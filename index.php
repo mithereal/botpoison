@@ -1,20 +1,23 @@
 <?php 
-require 'controller.php';
-require 'model.php';
-$controller=new controller;
-$model=new tarpit;
-$model->addBot();
-//$badbot=$model->isBot();
-$valid=$controller->targetValid();
+require 'classes/tarpit.php';
+$tarpit=new tarpit;
+$badbot=$tarpit->isBot();
+$valid=$tarpit->targetValid();
+	
 if (isset($badbot)) { 
-	if(isset($controller->settings['sendemail'])){
-		$controller->sendEmail();
+	require 'views/'.$tarpit->settings['jail'].'.php';
+	}else{
+		$tarpit->addBot();
+		if($tarpit->settings['sendemail'] == true){
+		$tarpit->sendEmail();
 		}
+		
+if(isset($valid))
+	{
+	if($tarpit->settings['displaywhois'] == true){
+	$arin=$tarpit->arin();
+	}
+	}
+		require 'views/index.php';	
 	}
 ?>
-<!DOCTYPE html>
-<?php
-require '/view/index.php';
-?>
-</html>
-
