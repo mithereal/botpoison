@@ -17,6 +17,8 @@ class tarpit{
 
 public $target; 	
 public $settings;
+//private $DOCUMENT_ROOT=$_SERVER['DOCUMENT_ROOT'];
+
 	
 	public function tarpit(){
 		require 'includes/config.php'; 
@@ -56,6 +58,13 @@ public $settings;
 	}
 	fclose($fp);
 	return $badbot;
+	}
+	
+	/* @return bool
+	 * This function will determine weather the user is a known bot (ie already in the database)
+	 */
+	public function isBot2($type=null){
+		
 	}
 	
 	/* @return bool

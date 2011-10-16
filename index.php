@@ -1,5 +1,5 @@
 <?php 
-require 'classes/tarpit.php';
+require 'classes/tarpit.php';;
 $tarpit=new tarpit;
 $badbot=$tarpit->isBot();
 $valid=$tarpit->targetValid();

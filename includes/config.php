@@ -1,10 +1,10 @@
 <?php
 $settings=array(
-'displaywhois'=>true,
+'displaywhois'=>false,
 'ban_expires'=>'random hours',
 'blacklistfile'=>'includes/labrea.db',
 'sendemail'=>false,
-'jail'=>'banned',  //name of file to trap bots; located in /view/banned.php 
+'jail'=>'blog',  //name of file to trap bots; located in /view/xxx.php 'poison|banned|blog' 
 'emailsender'=>'botcheck' . @$_SERVER['HTTP_HOST'],
 'alertemail'=>'mithereal@gmail.com',
 'returnurl'=> $_SERVER['HTTP_HOST'],
