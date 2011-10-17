@@ -61,13 +61,6 @@ public $settings;
 	}
 	
 	/* @return bool
-	 * This function will determine weather the user is a known bot (ie already in the database)
-	 */
-	public function isBot2($type=null){
-		
-	}
-	
-	/* @return bool
 	 * This function will add a ip address to the database
 	 */
 	public function addBot()
@@ -77,8 +70,10 @@ public $settings;
 	$datestamp = date("l, F jS Y @ H:i:s", $tmestamp);
 	$filename =  $this->settings['blacklistfile'];
 	$fp = fopen($filename, 'a+'); // append to blacklistfile
+	flock($fp, LOCK_EX);
 	fwrite($fp, $_SERVER['REMOTE_ADDR'] ." - ". $_SERVER['REQUEST_METHOD'] ." - ". $_SERVER['SERVER_PROTOCOL'] ." - ". $datestamp ." - ". $_SERVER['HTTP_USER_AGENT'] ."\n");
-	$succerss=true;
+	flock($fp, LOCK_UN);
+	$success=true;
 	fclose($fp);
 	return $success;
 	}
@@ -186,7 +181,9 @@ public $settings;
 	$wiped=null;
 	$filename =  $this->settings['blacklistfile'];
 	$fp = fopen($filename, 'w+'); //   overwrite  the blacklistfile 
+	flock($fp, LOCK_EX);
 	fwrite($fp,  "\n" );
+	flock($fp, LOCK_UN);
 	$wiped=true;
 	fclose($fp);
 	return $wiped;
@@ -214,16 +211,94 @@ public $settings;
 	$time=$this->getBantime($ipinfo);
 	return $time;
 	}
+
+	public function free_ip()
+	{
+		$IPtrap=$this->iptrap();
+		$fp = fopen($this->settings['blacklistfile'], 'w') or die("\t\t\t<p>Error opening file...</p>\n\t\t</div>\n\t</body>\n</html>");
+		flock($fp, LOCK_EX);
+		if ( $fp != 0 ) {
+			while ($line = fgets($fp)) {
+				//echo 'blockip is ' . $blockip .'<br>'; //Fixme:: blockip is showing werong
+				//if($blockip != $_SERVER['REMOTE_ADDR']){
+				if(!preg_match("/^ \$_SERVER['REMOTE_ADDR']/",$line)){
+				fputs($fp,"$line");
+				}
+			}
+			flock($fp, LOCK_UN);
+			fclose($fp);
+		}
+	}
+	
+	public function iptrap()
+	{
+		$IPtrap=file($this->settings['blacklistfile']);
+		sort($IPtrap);
+		reset($IPtrap);
+
+		//fclose($file);
+		return $IPtrap;
+	}
 	
 	private function getBantime($string=null)
 	{
 		$time=$string;
 		$filename =  $this->settings['blacklistfile'];
 		$file=file($filename);
-		//fclose($file);
+		fclose($file);
 		return $time;
 	}
 	
-	
+	public function process_captcha()
+{
+	$success=false;
+  $_SESSION['ctform'] = array(); // re-initialize the form session data
+
+  if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ct_captcha'])) {
+  	// if the form has been submitted
+  	
+    $captcha = @$_POST['ct_captcha']; // the user's entry for the captcha code
+
+    $errors = array();  // initialize empty error array
+
+    // Only try to validate the captcha if the form has no errors
+    // This is especially important for ajax calls
+    
+    if (sizeof($errors) == 0) {
+     require_once 'securimage/securimage.php';
+      $securimage = new Securimage();
+      
+      if ($securimage->check($captcha) == false) {
+        $errors['captcha_error'] = 'Incorrect security code entered<br />';
+      }
+      // no errors, 
+     // echo "Correct security code entered<br>";
+      $this->free_ip(); //get banned ip and remove ip
+      $_SESSION['ctform']['error'] = false;  // no error with form
+      $success=true;
+      
+      if (sizeof($errors) != 0) {
+		  $success = false;
+		   $_SESSION['ctform']['error'] = true; // set error floag
+	  }
+    } else {
+		$success = false;
+      // do nothing
+//echo "Incorrect security code entered<br>";
+
+/*
+      foreach($errors as $key => $error) {
+      	// set up error messages to display with each field
+        $_SESSION['ctform'][$key] = "<span style=\"font-weight: bold; color: #f00\">$error</span>";
+       // echo $_SESSION['ctform'][$key];
+      }
+*/
+
+      $_SESSION['ctform']['error'] = true; // set error floag
+    }
+  } // POST
+  return $success;
+}
+
 }
 ?>

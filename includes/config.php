@@ -1,11 +1,13 @@
 <?php
 $settings=array(
+'retrunurl'=>'http://' . $_SERVER['SERVER_NAME'],
 'displaywhois'=>false,
-'ban_expires'=>'random hours',
+'ban_expires'=>'24 hours',
 'blacklistfile'=>'includes/labrea.db',
 'sendemail'=>false,
 'jail'=>'blog',  //name of file to trap bots; located in /view/xxx.php 'poison|banned|blog' 
 'emailsender'=>'botcheck' . @$_SERVER['HTTP_HOST'],
+'htaccesspath'=>'/',  //path to htaccess file
 'alertemail'=>'mithereal@gmail.com',
 'returnurl'=> $_SERVER['HTTP_HOST'],
 'kronfile'=>'includes/k.dat',  //for kron tempfile

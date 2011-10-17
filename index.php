@@ -3,7 +3,13 @@ require 'classes/tarpit.php';;
 $tarpit=new tarpit;
 $badbot=$tarpit->isBot();
 $valid=$tarpit->targetValid();
-	
+
+$passedcaptcha=$tarpit->process_captcha();
+if( $passedcaptcha == true)
+{
+	header('Location: '. 'http://' . $tarpit->settings['returnurl']);
+}else{
+
 if (isset($badbot)) { 
 	require 'views/'.$tarpit->settings['jail'].'.php';
 	}else{
@@ -20,4 +26,5 @@ if(isset($valid))
 	}
 		require 'views/index.php';	
 	}
+}
 ?>

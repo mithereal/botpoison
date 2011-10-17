@@ -33,7 +33,7 @@ public $numsalt_ratio = 10;                             // One out of X times a 
 public $internat_ratio = 3;                             // One out of X times an international domain is used.
 public $link_firstratio;          // One out of each X words is converted to a link in first paragraphs.
 public $link_lastratio ;           // One out of each X words is converted to a link in last paragraphs.
-public $title_insertrate = 5;                           // Percentage of the time that the title is used as body text.
+public $title_insertrate = 1;                           // Percentage of the time that the title is used as body text.
 public $symbol_ratio = 10;                              // One out of each X words is appended a punctuation symbol.
 public $use_spammer_list = true;                       // If we will include the spammer database as source of emails.
 public $spammer_file = "includes/spammers.txt";                  // Spammer list file, relative to calling script.
@@ -298,7 +298,7 @@ public function build_dummytext ($totalwords, &$wordlist, $linkratio, $title) {
         if(isset($this->displayscripturl)){
         $newlink = $this->scripturl . "/" . $newlink;  //edit here to change seo suff
         }else{
-        $newlink = $this->scripturl . "/$this->scriptname/" . $newlink;
+        $newlink = $this->scripturl . "/$this->scriptname?t=" . $newlink;
         }
         $newtext .= "\n<a href=\"" . $newlink . "\">" . $wordlist[$word] . "</a>";
       }

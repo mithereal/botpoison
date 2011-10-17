@@ -67,12 +67,15 @@ public function build_comment ($totalmails, &$wordlist, &$spammerlist) {
       $newemail = $newuser . "@" . $newdom;
     }
     if ($newemail) {
-      $list .= "<span class='email'><a href=\"mailto:" . $newemail . "\">" . $newemail . "</a></span>\n";
+      $list .= "<div class='email'><a href=\"mailto:" . $newemail . "\">" . $newemail . "</a></div>\n";
     }
     $list .= "</div>\n";
   }
   
   return $list;
 }
+
+
+
 }
 ?>
