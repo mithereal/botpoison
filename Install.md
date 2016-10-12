@@ -2,7 +2,7 @@
 
 * Unzip to the root dir.
 * Locate the main php script (bootstrap), usually index.php.
-* Edit your bootstrap file by adding to the top of the file
+* Edit your bootstrap file by adding to the top of the file after <?php
 
 ```php
 include($_SERVER['DOCUMENT_ROOT'] . "/php-labrea/classes/tarpit.php"); 
@@ -26,7 +26,7 @@ include($_SERVER['DOCUMENT_ROOT'] . "/php-labrea/classes/tarpit.php");
 ## Wordpress Application
 
 * Unzip to the root dir.
-* Edit wp-load.php by adding to the top of the file
+* Edit wp-load.php by adding to the top of the file after <?php
 
 ```php
 include($_SERVER['DOCUMENT_ROOT'] . "/php-labrea/classes/tarpit.php"); 
