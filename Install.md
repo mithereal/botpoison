@@ -46,4 +46,5 @@ include($_SERVER['DOCUMENT_ROOT'] . "/php-labrea/classes/tarpit.php");
 ```php
 <?php $pitdir = "http://" . $_SERVER['HTTP_HOST'] . "/php-labrea/"; ?>
     <a href="<?php echo $pitdir; ?>"><img src="images/pixel.gif" border="0" 
-    alt=" 
+    alt=" " width="1" height="1" style="display:none;"></a>
+```
