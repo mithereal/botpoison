@@ -33,6 +33,7 @@ class Tarpit implements Blackhole_Interface
     }
 
     /* @return property
+     * @param string
      * Getter Function
      */
     public function get($var)
@@ -40,6 +41,8 @@ class Tarpit implements Blackhole_Interface
     }
 
     /* @return property
+     * @param property name
+     * @param property value
      * Setter Function
      */
     public function set($var, $value)
@@ -47,6 +50,7 @@ class Tarpit implements Blackhole_Interface
     }
 
     /* @return bool
+     * @param string
      * This function will determine weather the ip is valid
      */
     public function targetValid($target = null)
@@ -63,6 +67,7 @@ class Tarpit implements Blackhole_Interface
     }
 
     /* @return bool
+     * @param  string
      * This function will determine weather the user is a known bot (ie already in the database)
      */
     public function isFlagged($ip = null)
@@ -83,6 +88,7 @@ class Tarpit implements Blackhole_Interface
     }
 
     /* @return bool
+     * @param  string
      * This function will add a ip address to the database
      */
     public function addIp($ip = null)
@@ -102,6 +108,8 @@ class Tarpit implements Blackhole_Interface
 
 
     /* @return string
+     * @param string
+     * @param string
      * This function grabs whoid query data
      */
     public function arin($target = null, $msg = null)
@@ -157,6 +165,7 @@ class Tarpit implements Blackhole_Interface
     }
 
     /* @return string
+     * @param array
      * This function will format a string
      */
     public function message($data = [])
@@ -168,6 +177,7 @@ class Tarpit implements Blackhole_Interface
     }
 
     /* @return bool;
+     * @param array
      * This function will send email to your an email address
      */
     public function sendEmail($data = [])
@@ -190,6 +200,7 @@ class Tarpit implements Blackhole_Interface
     }
 
     /* @return bool
+     * @param string
      * This function will touch a file
      */
     public function touch($filename = null)
@@ -218,6 +229,7 @@ class Tarpit implements Blackhole_Interface
     }
 
     /* @return string
+     * @param string
      * This function will return the date/time the ip address was banned
      */
     public function getTimebanned($ipaddress = null)
@@ -240,6 +252,7 @@ class Tarpit implements Blackhole_Interface
     }
 
     /* @return string
+     * @param string
      * This function will remove one ip address from the database (pit)
      */
     public function removeIp($ip = null)
@@ -273,6 +286,7 @@ class Tarpit implements Blackhole_Interface
     }
 
     /* @return string
+     * @param string
      * This function will get the banned time of the ip
      */
     private function getBantime($string = null)
@@ -285,6 +299,7 @@ class Tarpit implements Blackhole_Interface
     }
 
     /* @return bool
+     * @param string
      * This function will process the captcha
      */
     public function processCaptcha($data = null)
