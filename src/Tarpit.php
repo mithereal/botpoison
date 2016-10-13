@@ -17,7 +17,6 @@ namespace Mithereal\Tarpit;
 
 class Tarpit implements Blackhole_Interface
 {
-    use Mithereal\Tarpit\Email_Poison;
 
     public $target;
     public $settings;

@@ -2,7 +2,7 @@
 
 namespace Mithereal\Tarpit;
 
-class Email_Poison implements Poison_Interface
+class Email implements Poison_Interface
 {
     public $csslink = 'views/css/index.css';
     public $scripturl;
