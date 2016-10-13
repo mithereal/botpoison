@@ -17,7 +17,7 @@ namespace Mithereal\Tarpit;
 
 class Tarpit implements Blackhole_Interface
 {
-    use Mithereal\Tarpit\Poision;
+    use Mithereal\Tarpit\Email_Poison;
 
     public $target;
     public $settings;
@@ -25,9 +25,11 @@ class Tarpit implements Blackhole_Interface
     /* @return false
      * Construct Function
      */
-    public function __construct()
+    public function __construct($settings = null)
     {
+    if(null === $settings){
         require 'lib/config.php';
+    }
         $this->settings = $settings;
         $this->target = $_SERVER['REMOTE_ADDR'];
     }

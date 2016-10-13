@@ -2,7 +2,7 @@
 
 namespace Mithereal\Tarpit;
 
-class Poison
+class Email_Poison implements Poison_Interface
 {
     public $csslink = 'views/css/index.css';
     public $scripturl;
@@ -89,7 +89,7 @@ class Poison
         "cz", "sg", "ar", "my", "il", "ir", "nz", "tw", "pt", "za",
         "bg", "id", "ro", "mc", "ua", "ve");
 
-    public function init()
+    public function __construct()
     {
         $this->link_firstratio = $this->maxdummy_words;          // One out of each X words is converted to a link in first paragraphs.
         $this->link_lastratio = $this->mindummy_words;
@@ -126,6 +126,23 @@ class Poison
         $this->target = $target;
         $this->level = $level;
         $this->scripturl = $scripturl;
+    }
+
+    /* @return property
+     * @param string
+     * Getter Function
+     */
+    public function get($var)
+    {
+    }
+
+    /* @return property
+     * @param property name
+     * @param property value
+     * Setter Function
+     */
+    public function set($var, $value)
+    {
     }
 
     public function displayPage()
