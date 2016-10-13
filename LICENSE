@@ -1,9 +1,9 @@
-Title: Php Labrea - The Robot Tarpit.
+Title: botpoison.
 Description: Automatically trap and block bots that don't obey robots.txt rules
-Project URL: http://code.google.com/p/php-labrea/
+Project URL: 
 Author: Jason Clark 
-Release: Oct 17th, 2011
-Version: 1.0
+Release: Oct 12th, 2016
+Version: 2.0
 
 Credits: php-labrea includes customized/modified versions of these fine scripts:
  - Network Query Tool @ http://www.drunkwerks.com/docs/NetworkQueryTool/
