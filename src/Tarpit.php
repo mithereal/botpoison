@@ -16,13 +16,14 @@ Credits: The Blackhole includes customized/modified versions of these fine scrip
 namespace Mithereal\Tarpit;
 
 class Tarpit implements Blackhole_Interface {
+use Mithereal\Tarpit\Poision;
 
 public $target; 	
 public $settings;
 //private $DOCUMENT_ROOT=$_SERVER['DOCUMENT_ROOT'];
 
 	
-	public function tarpit(){
+	public function __construct(){
 		require 'lib/config.php';
 		$this->settings=$settings;
 		$this->target = $_SERVER['REMOTE_ADDR'];
@@ -33,8 +34,9 @@ public $settings;
 	 */
 	public function targetValid($target=null){
 	$target=$this->target;
-		if ((!$target) || (!preg_match("/^[\w\d\.\-]+\.[\w\d]{1,4}$/i", $this->target))) { 
-			$this->message("Error: You did not specify a valid target host or IP.");
+		if ((!$target) || (!preg_match("/^[\w\d\.\-]+\.[\w\d]{1,4}$/i", $this->target))) {
+		$message['message'] = " Error: You did not specify a valid target host or IP.";
+			$this->message($message);
 			$isvalid=false;
 		}else{
 			$isvalid=true;
@@ -83,11 +85,17 @@ public $settings;
 	/* @return string
 	 * This function grabs whoid query data
 	 */
+
+	public function get($var) {
+	}
+	public function set($var, $value) {
+	}
+
 	public function arin($target=null,$msg=null) {
 	$target=$this->target;
 	$server = "whois.arin.net";
 	if (!$target = gethostbyname($this->target)) {
-		$msg .= "Can't IP Whois without an IP address.";
+		$message['message'] .= " Can't IP Whois without an IP address.";
 	} else {
 		$sock=null;
 		$buffer=null;
@@ -95,7 +103,7 @@ public $settings;
 
 		if (! $sock = fsockopen($server, 43, $num, $error, 20)) {
 			unset($sock);
-			$msg .= "Timed-out connecting to $server (port 43).";
+			$message['message'] .= " Timed-out connecting to $server (port 43).";
 		} else {
 			fputs($sock, "$target\n");
 			while (!feof($sock))
@@ -113,11 +121,14 @@ public $settings;
 			$nextServer = "whois.registro.br";
 		}
 		if ($nextServer) {
+		$server_message = [ ];
 			$buffer = "";
-			message("Deferred to specific whois server: $nextServer...");
+			$buffer = "";
+			$server_message['message'] = " Deferred to specific whois server: $nextServer...";
+			$this->message($server_message);
 			if (! $sock = fsockopen($nextServer, 43, $num, $error, 10)) {
 				unset($sock);
-				$msg .= "Timed-out connecting to $nextServer (port 43)";
+				$msg .= " Timed-out connecting to $nextServer (port 43)";
 			} else {
 				fputs($sock, "$target$extra\n");
 				while (!feof($sock))
@@ -125,38 +136,40 @@ public $settings;
 				fclose($sock);
 			}
 		}
-		$msg .= nl2br($buffer);
+		$message['message'] .= nl2br($buffer);
 	}
-	$msg = trim(ereg_replace('#', '', strip_tags($msg)));
-	$this->message($msg);
+	$message['message'] = trim(ereg_replace('#', '', strip_tags($message['message'])));
+	$this->message($message);
 }
 
 	/* @return string
 	 * This function will format a string for email sending
 	 */
-	public function message($msg) {
+	public function message($data = []) {
 	$timestamp = time();
 	$message= "\t\t\t" . "<h3>Your IP Address is " . $this->target . "</h3>" . "\n";
-	$message .= "\t\t\t" . "<pre>WHOIS Lookup for " . $this->target . "\n" . date("l, F jS Y @ H:i:s", $timestamp) . "\n\n" . $msg . "</pre>" . "\n";
+	$message .= "\t\t\t" . "<pre>WHOIS Lookup for " . $this->target . "\n" . date("l, F jS Y @ H:i:s", $timestamp) . "\n\n" . $data['message'] . "</pre>" . "\n";
 	return $message;
 	}
 	
 	/* @return bool;
-	 * This function will send email to your alertemail address as set in the config
+	 * This function will send email to your an email address
 	 */
-	public function sendEmail($msg=null)
+	public function sendEmail($data= [ ] )
 	{
 	$tmestamp  = time();
 	$datestamp = date("l, F jS Y @ H:i:s", $tmestamp);
-	$sender    = "$this->settings['emailsender']";
-	$recipient = "$this->settings['alertemail']";
-	$subject   = "Bad Bot Alert!";
+	$sender    = $data['sender'];
+	$recipient = $data['recipient'];
+	$subject   = $data['subject'];
 	$message   = $datestamp . "\n\n";
 	$message  .= "URL Request: " . $_SERVER['REQUEST_URI'] . "\n";
 	$message  .= "IP Address: " . $_SERVER['REMOTE_ADDR'] . "\n";
 	$message  .= "User Agent: " . $_SERVER['HTTP_USER_AGENT'] . "\n\n";
+	if(isset($data['whois'])){
 	$message  .= "Whois Lookup: " . "\n";
-	$message  .= "\n" . $msg . "\n";
+	$message  .= "\n" . $data['whois'] . "\n";
+	}
 	$success=mail($recipient, $subject, $message, "From: $sender"); // send email
 	return $success;
 	}
@@ -164,15 +177,14 @@ public $settings;
 	/*@return bool
 	 * This function will clear one ip address from the database (pit)
 	 */
-	public function touch()
+	public function touch($filename = null)
 	{
 	$cleared=null;
-	$filename =  $this->settings['kronfile'];
-	$fp = fopen($filename, 'w+'); //   overwrite  the blacklistfile 
+	$filename =  $filename;
+	$fp = fopen($filename, 'w+');
 	fwrite($fp,  "\n" );
-	$cleared=true;
 	fclose($fp);
-	return $cleared;
+	return true;
 	}
 	
 	/*@return bool
@@ -182,13 +194,12 @@ public $settings;
 	{
 	$wiped=null;
 	$filename =  $this->settings['blacklistfile'];
-	$fp = fopen($filename, 'w+'); //   overwrite  the blacklistfile 
+	$fp = fopen($filename, 'w+');
 	flock($fp, LOCK_EX);
 	fwrite($fp,  "\n" );
 	flock($fp, LOCK_UN);
-	$wiped=true;
 	fclose($fp);
-	return $wiped;
+	return true;
 	}
 	
 	/*@return string
@@ -216,7 +227,7 @@ public $settings;
 
 	public function removeIp($ip=null)
 	{
-		$IPtrap=$this->iptrap();
+		$ipTrap=$this->ipTrap();
 		$fp = fopen($this->settings['blacklistfile'], 'w') or die("\t\t\t<p>Error opening file...</p>\n\t\t</div>\n\t</body>\n</html>");
 		flock($fp, LOCK_EX);
 		if ( $fp != 0 ) {
@@ -232,16 +243,15 @@ public $settings;
 		}
 	}
 	
-	public function iptrap()
+	public function ipTrap()
 	{
-		$IPtrap=file($this->settings['blacklistfile']);
-		sort($IPtrap);
-		reset($IPtrap);
+		$ipTrap=file($this->settings['blacklistfile']);
+		sort($ipTrap);
+		reset($ipTrap);
 
-		//fclose($file);
-		return $IPtrap;
+		return $ipTrap;
 	}
-	
+
 	private function getBantime($string=null)
 	{
 		$time=$string;
