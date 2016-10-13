@@ -1,61 +1,36 @@
 <?php
 
-namespace Mithereal\Tarpit;
+namespace Mithereal\Blackhole;
 
-class Email implements Poison_Interface
+class Email extends Poison
 {
-    public $csslink = 'views/css/index.css';
-    public $scripturl;
-    public $level;
-    public $words;
-    public $target;
-    public $page;
-    private $scriptname = "index.php";                                // Name of the parent script. THIS MUST BE SET BEFORE USING.
-    public $minemails = 5;                                  // Minimum emails per page.
-    public $maxemails = 30;                                 // Maximum emails per page.
-    public $maxlevel = 15;                                  // Deepest level to create links.
-    public $word_file = "includes/pwpwords.txt";                     // Source word file, relative to calling script.
-    public $total_words = 99204;                            // Lines in source word file.
-    public $cache_file = "includes/cache.txt";                       // Cache word file, relative to calling script.
-    public $cached_words = 300;                             // Words to extract from source word list.
-    public $minword_len = 4;                                // Minimum length of words to use.
-    public $maxword_len = 10;                               // Maximum length of words to use.
-    public $cache_ttl = 7200;                               // Time before the cache file is rebuild (in seconds).
-    public $minsleeptime = 0;                              // Minimum time to sleep before finishing page (in seconds).
-    public $maxsleeptime = 0;                              // Maximum time to sleep before finishing page (in seconds).
-    public $mintitle_words = 2;                             // Minimum words to use as title.
-    public $maxtitle_words = 5;                             // Maximum words to use as title.
-    public $mindummy_words = 10;                            // Minimum words to use in paragraphs.
-    public $maxdummy_words = 25;                            // Maximum words to use in paragraphs.
-    public $pre_dummypar = 2;                               // Numbers of paragraphs before email list.
-    public $post_dummypar = 4;                              // Numbers of paragraphs after email list.
-    public $presalt_user = 0;                               // Salt characters to add at the beginning of username in emails.
-    public $postsalt_user = 2;                              // Salt characters to add at the ending of username in emails.
-    public $presalt_dom = 2;                                // Salt characters to add at the beginning of domains in emails.
-    public $postsalt_dom = 0;                               // Salt characters to add at the ending of domains in emails.
-    public $numsalt_ratio = 10;                             // One out of X times a number is used as salt (0 = never).
-    public $internat_ratio = 3;                             // One out of X times an international domain is used.
-    public $link_firstratio;          // One out of each X words is converted to a link in first paragraphs.
-    public $link_lastratio;           // One out of each X words is converted to a link in last paragraphs.
-    public $title_insertrate = 1;                           // Percentage of the time that the title is used as body text.
-    public $symbol_ratio = 10;                              // One out of each X words is appended a punctuation symbol.
-    public $use_spammer_list = true;                       // If we will include the spammer database as source of emails.
-    public $spammer_file = "includes/spammers.txt";                  // Spammer list file, relative to calling script.
-    public $spammer_ratio = 5;                              // One out of X emails a spammer email will be used.
-    public $spammer_generate = true;                        // If random emails will be generated using spammer domains.
-    public $spammer_genratio = 2;                           // One out of X times the spammer email is generated.
-// The following variables contain the appearance of the generated page, use them to match the appearance of your website.
-    public $html_preheader = "<html><head><title>\n";
-    public $html_postheader = "</title><meta NAME=\"ROBOTS\" CONTENT=\"NOINDEX, NOFOLLOW\">\n</head>\n<body>\n";
-    public $html_footer = "</body></html>\n";
-    public $script_version = "1.0";
-    public $title = "My Bot Blog";
+    public $settings = [
+        'count' => 200,
+        'word_file' => 200,
+        'total_words' => 0,
+        'word_cache_file' => "cache/word_cache.txt",
+        'email_cache_file' => "cache/email_cache.txt",
+        'cached_words' => 1000,
+        'minword_len' => 4,
+        'maxword_len' => 10,
+        'cache_ttl' => 7200,
+        'presalt_user' => 0,
+        'postsalt_user' => 2,
+        'presalt_dom' => 2,
+        'postsalt_dom' => 0,
+        'numsalt_ratio' => 10,
+        'internat_ratio' => 3,
+        'symbol_ratio' => 10,
+        'use_spammer_list' => true,
+        'spammer_file' => "lib/spammers.txt",
+        'spammer_ratio' => 5,
+        'spammer_genratio' => 2,
+        'script_version' => '1.0'
+    ];
 
-// Set some constants...
+
     public $common_symbols = array(".", ".", ".", ".", ",", ",", ",", ",", ",", ",", ",", ";", ";", ";", "?", "!");
     public $end_symbols = array(".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "?", "!");
-
-// Based on stats at http://www.webhosting.info/registries/global_stats/
     public $tldomains = array("com", "com", "com", "com", "com", "com", "com", "com", "com", "com", "com",
         "com", "com", "com", "com", "com", "com", "com", "com", "com", "com", "com",
         "com", "com", "com", "com", "com", "com", "com", "com", "com", "com", "com",
@@ -64,8 +39,6 @@ class Email implements Poison_Interface
         "net", "net", "net", "net", "net", "net", "net", "net",
         "org", "org", "org", "org",
         "biz", "biz", "info", "info", "edu", "gov");
-
-// Based on stats at http://www.webhosting.info/domains/country_stats/
     public $ctldomains = array("de", "de", "de", "de", "de", "de", "de", "de", "de", "de",
         "de", "de", "de", "de", "de", "de", "de", "de", "de", "de",
         "uk", "uk", "uk", "uk", "uk", "uk", "uk", "uk", "uk", "uk",
@@ -91,102 +64,75 @@ class Email implements Poison_Interface
 
     public function __construct()
     {
-        $this->link_firstratio = $this->maxdummy_words;          // One out of each X words is converted to a link in first paragraphs.
-        $this->link_lastratio = $this->mindummy_words;
-// Get the URL and split it, finding the target and the level...
+        $total_words = $this->linecount($file);
+        $this->fill_word_cache($this->settings['word_file'], $this->settings['word_cache_file'], $total_words, $this->settings['cached_words'], $this->settings['cache_ttl']);
+    }
 
+    /* @return string
+     * @param string
+     *  Function
+     */
+    public function linecount($file)
+    {
+        $linecount = 0;
+        $handle = fopen($file, "r");
 
-        $req_uri = $_SERVER["REQUEST_URI"];
-        if (!$req_uri) {
-            $req_uri = $HTTP_SERVER_VARS["REQUEST_URI"];
-            if (!$req_uri) {
-                $req_uri = $_ENV["REQUEST_URI"];
-                if (!$req_uri) {
-                    $req_uri = getenv("REQUEST_URI");
-                } else $req_uri = "";
-            }
+        while (!feof($handle)) {
+            $line = fgets($handle);
+            $linecount++;
         }
-        $url_array = explode("/", $req_uri);
 
-        $target = $url_array[(count($url_array) - 1)];
+        fclose($handle);
 
-        if ($target == $this->scriptname) {
-            $target = "";
-        } else {
-            unset ($url_array[(count($url_array) - 1)]);
-        }
-        $level = ereg_replace("[^[:digit:]_]", "", $target);
-        if (is_numeric($level)) {
-            $level = abs($level);
-        } else {
-            $level = 0;
-        }
-        $target = ereg_replace("[^[:alpha:]_]", "", $target);
-        $scripturl = implode("/", $url_array);
-        $this->target = $target;
-        $this->level = $level;
-        $this->scripturl = $scripturl;
+        return $linecount;
     }
 
     /* @return property
-     * @param string
+     * @param property name
+     * @param property value
      * Getter Function
      */
     public function get($var)
     {
+    return $this->settings[$var];
     }
 
-    /* @return property
+    /* @return bool
      * @param property name
      * @param property value
      * Setter Function
      */
     public function set($var, $value)
     {
+      $this->settings[$var] = $value;
+      return true;
     }
 
-    public function displayPage()
+    /* @return property
+     * Main Function
+     */
+    public function activate()
     {
 
-        if ($this->scriptname) {
-            $page = null;
-            $page = $this->html_preheader . $this->target . $this->html_postheader;
-            $this->fill_wordcache($this->word_file, $this->cache_file, $this->total_words, $this->cached_words, $this->cache_ttl);
-            $this->words = $this->load_words($this->cache_file, $this->target, $this->title_insertrate);
+        $words = $this->load_words($this->cache_file, $this->title_insertrate);
 
-            if ($this->use_spammer_list) {
-                $this->spammers = $this->load_spammers($this->spammer_file);
-            } else {
-                $this->spammers = false;
-            }
-
-            if ($this->words) {
-                $page .= "<h1>" . $this->build_dummytext($this->mintitle_words + rand(0, ($this->maxtitle_words - $this->mintitle_words)), $this->words, 0, $this->target) . "</h1>\n";
-                for ($pc = 1; $pc <= $this->pre_dummypar; $pc++) {
-                    $page .= "<p>" . $this->build_dummytext($this->mindummy_words + rand(0, ($this->maxdummy_words - $this->mindummy_words)), $this->words, $this->link_firstratio, $this->target) . "</p>\n";
-                }
-                $page .= $this->build_maillist($this->minemails + rand(0, ($this->maxemails - $this->minemails)), $this->words, $this->spammers); // build a <p>email</p>
-                if ($this->maxsleeptime > 0) {
-                    sleep($this->minsleeptime + rand(0, ($this->maxsleeptime - $this->minsleeptime)));
-                }
-                for ($pc = 1; $pc <= $this->post_dummypar; $pc++) {
-                    $page .= "<p>" . $this->build_dummytext($this->mindummy_words + rand(0, ($this->maxdummy_words - $this->mindummy_words)), $this->words, $this->link_lastratio, $this->target) . "</p>\n";
-                }
-
-            } else {
-                $page = '<div class="error" id="nowordlist">Unable to load Wordlist</div>';
-            }
-            $page .= $this->html_footer;
+        if ($this->use_spammer_list) {
+            $spammers = $this->load_words($this->spammer_file);
         } else {
-            $page = '<div class="error" id="notconfigured">DON\'T FORGET TO CONFIGURE THE SCRIPT!</div>';
+            $spammers = $this->generate($this->settings['count']);
         }
+      return  $this->generate_view($spammers);
 
-        echo $page;
     }
 
-    public function fill_wordcache($sourcefilename, $targetfilename, $totalsourcewords, $totaltargetwords, $ttl)
+    /* @return bool
+     * @param property name
+     * @param property value
+     * Load the words from the cache file to memory.
+     */
+    public function fill_word_cache($sourcefilename, $targetfilename, $totalsourcewords, $totaltargetwords,$minword_len, $maxword_len, $ttl)
     {
-//global $this->minword_len, $this->maxword_len;
+        $this->settings['count'] = $totalsourcewords;
         $sourcefile = null;
         if ($totalsourcewords > $totaltargetwords) {
             $wordsratio = round($totalsourcewords / $totaltargetwords);
@@ -205,7 +151,7 @@ class Email implements Poison_Interface
                     while ($wordcontent = fgets($sourcefile, 1024)) {
                         if ($ignorecount == $randomline) {
                             $wordcontent = ereg_replace("[^[:alpha:]_]", "", strtolower($wordcontent)) . "\n";
-                            if ((strlen($wordcontent) >= $this->minword_len) && (strlen($wordcontent) <= $this->maxword_len)) {
+                            if ((strlen($wordcontent) >= $minword_len) && (strlen($wordcontent) <= $maxword_len)) {
                                 fwrite($targetfile, $wordcontent);
                             }
                         } elseif ($ignorecount >= $wordsratio) {
@@ -219,49 +165,39 @@ class Email implements Poison_Interface
                 }
             }
         }
+        return true;
     }
 
-
-// Load the words from the cache file to memory.
-    public function load_words($sourcefilename, $pagetitle, $insertrate)
+    /* @return array
+     * @param property name
+     * @param property value
+     * Load the words from the cache file to memory.
+     */
+    public function load_words($sourcefilename, $insertrate)
     {
+        $wordlist = [];
         if (file_exists($sourcefilename) && is_readable($sourcefilename)) {
             $wordlist = file($sourcefilename);
             $tinserts = round(count($wordlist) / (100 / $insertrate));
+
             if (count($wordlist) > 0) {
                 foreach ($wordlist as $key => $value) {
                     $wordlist[$key] = trim($value);
                 }
             }
-            if ($pagetitle) {
-                for ($wc = 0; $wc < $tinserts; $wc++) {
-                    $wordlist[] = $pagetitle;
-                }
-            }
-            return $wordlist;
-        } else {
-            echo $sourcefilename;
-            return false;
         }
+         return $wordlist;
     }
 
 
-// Load the spammer emails from the spammers file to memory.
-    public function load_spammers($sourcefilename)
-    {
-        if (file_exists($sourcefilename) && is_readable($sourcefilename)) {
-            $spammerlist = file($sourcefilename);
-            return $spammerlist;
-        } else {
-            return false;
-        }
-    }
-
-
-// Add a short random string to the beginning or end of a given string.
+    /* @return array
+     * @param property name
+     * @param property value
+     * Add a short random string to the beginning or end of a given string.
+     */
     public function add_salt($textstr, $presalt, $postsalt)
     {
-//global $this->numsalt_ratio;
+
         $presaltstr = "";
         $postsaltstr = "";
         if ($presalt > 0) {
@@ -285,11 +221,16 @@ class Email implements Poison_Interface
         return ($presaltstr . $textstr . $postsaltstr);
     }
 
-
-// Convert to uppercase the first letter of each sentence.
+    /* @return array
+     * @param property name
+     * @param property value
+     * Convert to uppercase the first letter of each sentence.
+     */
     public function ucfirst($string)
     {
-//global $this->end_symbols;
+
+        $result = ("");
+
         if ($string) {
             $strarray = explode(" ", $string);
             $totwords = count($strarray);
@@ -301,53 +242,17 @@ class Email implements Poison_Interface
                 $restart = in_array(substr($strarray[$cw], -1), $this->end_symbols);
             }
             $strarray[0] = ucfirst($strarray[0]);
-            return (implode(" ", $strarray));
+            $result = (implode(" ", $strarray));
         }
-        return ("");
+        return $result;
     }
 
-
-// Create a paragraph using the word list, optionally create links within.
-    public function build_dummytext($totalwords, &$wordlist, $linkratio, $title)
-    {
-        if (count($wordlist) > 1) {
-            shuffle($wordlist);
-            if ($totalwords > count($wordlist)) {
-                $totalwords = count($wordlist);
-            }
-            $newlist = array_rand($wordlist, $totalwords);
-            $newtext = "";
-            foreach ($newlist as $word) {
-                if ((rand(1, $linkratio) == $linkratio) && ($wordlist[$word] != $title) && ($this->level < $this->maxlevel)) {
-                    $insertpos = rand(1, strlen($wordlist[$word])) - 1;
-                    $newlink = substr($wordlist[$word], 0, $insertpos) . ($this->level + 1) . substr($wordlist[$word], $insertpos, strlen($wordlist[$word]));
-                    if (isset($this->displayscripturl)) {
-                        $newlink = $this->scripturl . "/" . $newlink;  //edit here to change seo suff
-                    } else {
-                        $newlink = $this->scripturl . "/$this->scriptname?t=" . $newlink;
-                    }
-                    $newtext .= "\n<a href=\"" . $newlink . "\">" . $wordlist[$word] . "</a>";
-                } else {
-                    $newtext .= $wordlist[$word];
-                }
-                if (rand(1, $this->symbol_ratio) == $this->symbol_ratio) {
-                    $newtext .= $this->common_symbols[array_rand($this->common_symbols, 1)];
-                }
-                $newtext .= " ";
-            }
-            $newtext = substr($newtext, 0, -1);
-            if (in_array(substr($newtext, -1), $this->end_symbols)) {
-                $newtext = substr($newtext, 0, -1);
-            }
-            $newtext = $this->ucfirst($newtext);
-            $newtext .= $this->end_symbols[array_rand($this->end_symbols, 1)];
-            return $newtext;
-        }
-    }
-
-
-// Create a domain name.
-    public function build_domain(&$wordlist)
+    /* @return array
+     * @param property string
+     * @param property array
+     * Create a Domain.
+     */
+    public function build_domain($wordlist)
     {
 //global $this->tldomains, $this->ctldomains, $this->internat_ratio;
         $newdomain = $wordlist[array_rand($wordlist, 1)];
@@ -358,47 +263,80 @@ class Email implements Poison_Interface
         return $newdomain;
     }
 
-// Create an username.
-    public function build_username(&$wordlist)
+    /* @return string
+     * @param array
+     * Create a username.
+     */
+    public function build_username($wordlist)
     {
         return $wordlist[array_rand($wordlist, 1)];
     }
 
-// Extract domain name from email address.
+    /* @return string
+     * @param string
+     * Extract domain name from email address.
+     */
     public function extract_domain($email)
     {
         return strstr($email, "@");
     }
 
-// Create an email link.
-    public function build_maillist($totalmails, &$wordlist, &$spammerlist)
+    /* @return string
+     * @param string
+     * Create a view snippet.
+     */
+    public function generate_view($spammers)
     {
-        $list = "<p>\n";
-        for ($ce = 1; $ce < $totalmails; $ce++) {
-            $newemail = "";
-            if ($spammerlist && (rand(1, $this->spammer_ratio) == $this->spammer_ratio)) {
-                if ($this->spammer_generate && (rand(1, $this->spammer_genratio) == $this->spammer_genratio)) {
-                    $newuser = $this->add_salt($this->build_username($wordlist), $this->presalt_user, $this->postsalt_user);
-                    $newdom = $this->extract_domain(trim($spammerlist[array_rand($spammerlist, 1)]));
-                    if ($newdom) {
-                        $newemail = $newuser . $newdom;
-                    }
-                } else {
-                    $newemail = trim($spammerlist[array_rand($spammerlist, 1)]);
+    $dom = new DOMDocument();
+    $elem = $dom->createElement('div');
+
+    $view ='<ul>';
+    foreach($spammers as $s){
+    $view .='<li>' . $s . '</li>';
+    }
+    $view ='</ul>';
+
+   $result = $this->appendHTML($elem, $view);
+
+    return $result;
+    }
+
+     /* @return string
+     * @param string
+     * @param array
+     * Create a username.
+     */
+    public function generate($total, $wordlist)
+    {
+
+        for ($i = 1; $i < $total; $i++) {
+            $newemail = ' ';
+            if ((rand(1, $this->spammer_ratio) == $this->spammer_ratio)) {
+
+                $newuser = $this->add_salt($this->build_username($wordlist), $this->presalt_user, $this->postsalt_user);
+                $newdom = $this->extract_domain(trim($spammerlist[array_rand($spammerlist, 1)]));
+                if ($newdom) {
+                    $newemail = $newuser . $newdom;
                 }
             } else {
                 $newuser = $this->add_salt($this->build_username($wordlist), $this->presalt_user, $this->postsalt_user);
                 $newdom = $this->add_salt($this->build_domain($wordlist), $this->presalt_dom, $this->postsalt_dom);
                 $newemail = $newuser . "@" . $newdom;
             }
-            if ($newemail) {
-                $list .= "<a href=\"mailto:" . $newemail . "\">" . $newemail . "</a><br>\n";
-            }
+
         }
-        $list .= "</p>\n";
-        return $list;
+
+        return $newemail;
     }
 
+public function appendHTML(DOMNode $parent, $source) {
+    $tmpDoc = new DOMDocument();
+    $tmpDoc->loadHTML($source);
+    foreach ($tmpDoc->getElementsByTagName('body')->item(0)->childNodes as $node) {
+        $node = $parent->ownerDocument->importNode($node);
+        $parent->appendChild($node);
+    }
+}
 }
 
 ?>

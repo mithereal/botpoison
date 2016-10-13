@@ -1,7 +1,7 @@
 <?php
 $settings=array(
-'blacklistfile'=>'includes/labrea.db',
+'blacklistfile'=>'includes/blackhole.db',
 'htaccesspath'=>'/',
-'version'=>'PhpLaBrea V2.0',
+'version'=>'BotPoison V1.0',
 );
 ?>

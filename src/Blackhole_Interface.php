@@ -1,6 +1,6 @@
 <?php
 
-namespace Mithereal\Tarpit;
+namespace Mithereal\Blackhole;
 
 interface Blackhole_Interface
 

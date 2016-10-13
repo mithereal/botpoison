@@ -1,10 +1,10 @@
 <?php
 /*
-Title: Php-labrea
-Description: Automatically trap and block bots that don't obey robots.txt rules
-Project URL: http://code.google.com/p/php-labrea/
+Title: BotPoison
+Description: Automatically trap, block and poison bots that don't obey robots.txt rules
+Project URL:
 Author: Jason Clark, aka mithereal
-Release: Oct 8th, 2011
+Release:
 Version: 1.0
 
 Credits: The Blackhole includes customized/modified versions of these fine scripts:
@@ -13,9 +13,9 @@ Credits: The Blackhole includes customized/modified versions of these fine scrip
 * perishablepress.com @ http://perishablepress.com/press/2010/07/14/blackhole-bad-bots/
 */
 
-namespace Mithereal\Tarpit;
+namespace Mithereal\Blackhole;
 
-class Tarpit implements Blackhole_Interface
+class Blackhole implements Blackhole_Interface
 {
 
     public $target;
@@ -217,7 +217,7 @@ class Tarpit implements Blackhole_Interface
     /* @return bool
      * This function will wipe all ip addresses from the database (pit)
      */
-    public function wipePit()
+    public function clear()
     {
         $wiped = null;
         $filename = $this->settings['blacklistfile'];
@@ -248,8 +248,12 @@ class Tarpit implements Blackhole_Interface
         }
         fclose($fp);
 
-        $time = $this->getBantime($ipinfo);
+        $time = $string;
+        $filename = $this->settings['blacklistfile'];
+        $file = file($filename);
+        fclose($file);
         return $time;
+
     }
 
     /* @return string
@@ -286,73 +290,18 @@ class Tarpit implements Blackhole_Interface
         return $ipTrap;
     }
 
-    /* @return string
-     * @param string
-     * This function will get the banned time of the ip
+ /* @return string
+     * This function will return the view
      */
-    private function getBantime($string = null)
+    public function view($file,$poison_type)
     {
-        $time = $string;
-        $filename = $this->settings['blacklistfile'];
-        $file = file($filename);
-        fclose($file);
-        return $time;
+    $file_data = file_get_contents($file);
+    $poison = new $poison_type();
+    $effect = new Poison();
+    $result = $effect->inject($file_data,$poison);
+    return $result;
     }
 
-    /* @return bool
-     * @param string
-     * This function will process the captcha
-     */
-    public function processCaptcha($data = null)
-    {
-        $success = false;
-        $_SESSION['ctform'] = array(); // re-initialize the form session data
-
-        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['ct_captcha'])) {
-            // if the form has been submitted
-
-            $captcha = @$_POST['ct_captcha']; // the user's entry for the captcha code
-
-            $errors = array();  // initialize empty error array
-
-            // Only try to validate the captcha if the form has no errors
-            // This is especially important for ajax calls
-
-            if (sizeof($errors) == 0) {
-                require_once 'securimage/securimage.php';
-                $securimage = new Securimage();
-
-                if ($securimage->check($captcha) == false) {
-                    $errors['captcha_error'] = 'Incorrect security code entered<br />';
-                }
-                // no errors,
-                // echo "Correct security code entered<br>";
-                $this->free_ip(); //get banned ip and remove ip
-                $_SESSION['ctform']['error'] = false;  // no error with form
-                $success = true;
-
-                if (sizeof($errors) != 0) {
-                    $success = false;
-                    $_SESSION['ctform']['error'] = true; // set error floag
-                }
-            } else {
-                $success = false;
-                // do nothing
-//echo "Incorrect security code entered<br>";
-
-                /*
-                      foreach($errors as $key => $error) {
-                          // set up error messages to display with each field
-                        $_SESSION['ctform'][$key] = "<span style=\"font-weight: bold; color: #f00\">$error</span>";
-                       // echo $_SESSION['ctform'][$key];
-                      }
-                */
-
-                $_SESSION['ctform']['error'] = true; // set error floag
-            }
-        } // POST
-        return $success;
-    }
 
 }
 
