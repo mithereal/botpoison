@@ -1,6 +1,6 @@
 <?php
 
-namespace Mithereal\Poison;
+namespace Mithereal\Tarpit;
 
 class Poison
 {

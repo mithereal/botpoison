@@ -15,7 +15,7 @@ Credits: The Blackhole includes customized/modified versions of these fine scrip
 
 namespace Mithereal\Tarpit;
 
-class Tarpit{
+class Tarpit implements Blackhole_Interface {
 
 public $target; 	
 public $settings;
@@ -23,7 +23,7 @@ public $settings;
 
 	
 	public function tarpit(){
-		require 'includes/config.php'; 
+		require 'lib/config.php';
 		$this->settings=$settings;
 		$this->target = $_SERVER['REMOTE_ADDR'];
 	}
@@ -45,7 +45,7 @@ public $settings;
 	/* @return bool
 	 * This function will determine weather the user is a known bot (ie already in the database)
 	 */
-	public function isBot($type=null){
+	public function isFlagged($ip=null){
 	$badbot = null; // set default value
 	$filename =  $this->settings['blacklistfile']; // scan to prevent duplicates
 	$fp = fopen($filename, "r") or die("\t\t\t<p>Error opening file...</p>\n\t\t</div>\n\t</body>\n</html>");
@@ -65,7 +65,7 @@ public $settings;
 	/* @return bool
 	 * This function will add a ip address to the database
 	 */
-	public function addBot()
+	public function addIp($ip=null)
 	{
 		$success=null;
 	$tmestamp  = time();
@@ -214,7 +214,7 @@ public $settings;
 	return $time;
 	}
 
-	public function free_ip()
+	public function removeIp($ip=null)
 	{
 		$IPtrap=$this->iptrap();
 		$fp = fopen($this->settings['blacklistfile'], 'w') or die("\t\t\t<p>Error opening file...</p>\n\t\t</div>\n\t</body>\n</html>");
@@ -251,7 +251,7 @@ public $settings;
 		return $time;
 	}
 	
-	public function process_captcha()
+	public function processCaptcha($data = null)
 {
 	$success=false;
   $_SESSION['ctform'] = array(); // re-initialize the form session data

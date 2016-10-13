@@ -1,5 +1,5 @@
 {
-    "name": "mithereal/php-labrea",
+    "name": "php-labrea",
     "description": "Automatically trap and block bots that don't obey robots.txt rules .",
     "keywords": ["bot", "security"],
     "require": {
