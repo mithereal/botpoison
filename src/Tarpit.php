@@ -147,8 +147,8 @@ public $settings;
 	 */
 	public function message($data = []) {
 	$timestamp = time();
-	$message= "\t\t\t" . "<h3>Your IP Address is " . $this->target . "</h3>" . "\n";
-	$message .= "\t\t\t" . "<pre>WHOIS Lookup for " . $this->target . "\n" . date("l, F jS Y @ H:i:s", $timestamp) . "\n\n" . $data['message'] . "</pre>" . "\n";
+	$message= "\t\t\t" . "<h3>IP Address: " . $this->target . "</h3>" . "\n";
+	$message .= "\t\t\t" . "<pre>Message: " . $data['message'] . "</pre>" . "\n";
 	return $message;
 	}
 	
