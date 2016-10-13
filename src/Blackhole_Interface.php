@@ -5,9 +5,9 @@ namespace Mithereal\Blackhole;
 interface Blackhole_Interface
 
 {
-    public function addIp($ip);
-    public function removeIp($ip);
-    public function isFlagged($ip);
+    public function swallow($ip);
+    public function spit($ip);
+    public function detect($ip);
 
     public function set($var, $value);
     public function get($var);

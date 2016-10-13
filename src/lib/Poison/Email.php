@@ -221,31 +221,6 @@ class Email extends Poison
         return ($presaltstr . $textstr . $postsaltstr);
     }
 
-    /* @return array
-     * @param property name
-     * @param property value
-     * Convert to uppercase the first letter of each sentence.
-     */
-    public function ucfirst($string)
-    {
-
-        $result = ("");
-
-        if ($string) {
-            $strarray = explode(" ", $string);
-            $totwords = count($strarray);
-            $restart = false;
-            for ($cw = 0; $cw < $totwords; $cw++) {
-                if ($restart) {
-                    $strarray[$cw] = ucfirst($strarray[$cw]);
-                }
-                $restart = in_array(substr($strarray[$cw], -1), $this->end_symbols);
-            }
-            $strarray[0] = ucfirst($strarray[0]);
-            $result = (implode(" ", $strarray));
-        }
-        return $result;
-    }
 
     /* @return array
      * @param property string

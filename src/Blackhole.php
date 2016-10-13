@@ -2,15 +2,10 @@
 /*
 Title: BotPoison
 Description: Automatically trap, block and poison bots that don't obey robots.txt rules
-Project URL:
-Author: Jason Clark, aka mithereal
-Release:
+Project URL: https://github.com/mithereal/botpoison
+Author: Jason Clark (mithereal@gmail.com)
+Release: 10.13.2016
 Version: 1.0
-
-Credits: The Blackhole includes customized/modified versions of these fine scripts:
-- Network Query Tool @ http://www.drunkwerks.com/docs/NetworkQueryTool/
-- Kloth.net Bot Trap @ http://www.kloth.net/internet/bottrap.php
-* perishablepress.com @ http://perishablepress.com/press/2010/07/14/blackhole-bad-bots/
 */
 
 namespace Mithereal\Blackhole;
@@ -59,7 +54,7 @@ class Blackhole implements Blackhole_Interface
         $target = $this->target;
         if ((!$target) || (!preg_match("/^[\w\d\.\-]+\.[\w\d]{1,4}$/i", $this->target))) {
             $message['message'] = " Error: You did not specify a valid target host or IP.";
-            $this->message($message);
+            $this->debug($message);
             $isvalid = false;
         } else {
             $isvalid = true;
@@ -71,7 +66,7 @@ class Blackhole implements Blackhole_Interface
      * @param  string
      * This function will determine weather the user is a known bot (ie already in the database)
      */
-    public function isFlagged($ip = null)
+    public function detect($ip = null)
     {
         $badbot = null; // set default value
         $filename = $this->settings['blacklistfile']; // scan to prevent duplicates
@@ -92,7 +87,7 @@ class Blackhole implements Blackhole_Interface
      * @param  string
      * This function will add a ip address to the database
      */
-    public function addIp($ip = null)
+    public function swallow($ip = null)
     {
         $success = null;
         $tmestamp = time();
@@ -111,9 +106,9 @@ class Blackhole implements Blackhole_Interface
     /* @return string
      * @param string
      * @param string
-     * This function grabs whoid query data
+     * This function grabs whois query data
      */
-    public function arin($target = null, $msg = null)
+    private function whois($target = null, $msg = null)
     {
         $target = $this->target;
         $server = "whois.arin.net";
@@ -148,7 +143,7 @@ class Blackhole implements Blackhole_Interface
                 $buffer = "";
                 $buffer = "";
                 $server_message['message'] = " Deferred to specific whois server: $nextServer...";
-                $this->message($server_message);
+                $this->debug($server_message);
                 if (!$sock = fsockopen($nextServer, 43, $num, $error, 10)) {
                     unset($sock);
                     $msg .= " Timed-out connecting to $nextServer (port 43)";
@@ -162,18 +157,19 @@ class Blackhole implements Blackhole_Interface
             $message['message'] .= nl2br($buffer);
         }
         $message['message'] = trim(ereg_replace('#', '', strip_tags($message['message'])));
-        $this->message($message);
+        $this->debug($message);
     }
 
     /* @return string
      * @param array
-     * This function will format a string
+     * This function will create a message with timestamp and ip
      */
-    public function message($data = [])
+    public function debug($data = [])
     {
         $timestamp = time();
-        $message = "\t\t\t" . "<h3>IP Address: " . $this->target . "</h3>" . "\n";
-        $message .= "\t\t\t" . "<pre>Message: " . $data['message'] . "</pre>" . "\n";
+        $message = "\t\t\t" . "Timestamp: " . $timestamp .  "\n";
+        $message .= "\t\t\t" . "IP Address: " . $this->target .  "\n";
+        $message .= "\t\t\t" . "Message: " . $data['message'] .  "\n";
         return $message;
     }
 
@@ -181,7 +177,7 @@ class Blackhole implements Blackhole_Interface
      * @param array
      * This function will send email to your an email address
      */
-    public function sendEmail($data = [])
+    public function contact($data = [])
     {
         $tmestamp = time();
         $datestamp = date("l, F jS Y @ H:i:s", $tmestamp);
@@ -233,7 +229,7 @@ class Blackhole implements Blackhole_Interface
      * @param string
      * This function will return the date/time the ip address was banned
      */
-    public function getTimebanned($ipaddress = null)
+    public function inspect($ipaddress = null)
     {
         $time = null;
         $filename = $this->settings['blacklistfile']; // scan to prevent duplicates
@@ -258,17 +254,15 @@ class Blackhole implements Blackhole_Interface
 
     /* @return string
      * @param string
-     * This function will remove one ip address from the database (pit)
+     * This function will remove one ip address from the database
      */
-    public function removeIp($ip = null)
+    public function spit($ip = null)
     {
-        $ipTrap = $this->ipTrap();
+        $dataset = $this->data();
         $fp = fopen($this->settings['blacklistfile'], 'w') or die("\t\t\t<p>Error opening file...</p>\n\t\t</div>\n\t</body>\n</html>");
         flock($fp, LOCK_EX);
         if ($fp != 0) {
             while ($line = fgets($fp)) {
-                //echo 'blockip is ' . $blockip .'<br>'; //Fixme:: blockip is showing werong
-                //if($blockip != $_SERVER['REMOTE_ADDR']){
                 if (!preg_match("/^ \$_SERVER['REMOTE_ADDR']/", $line)) {
                     fputs($fp, "$line");
                 }
@@ -279,26 +273,26 @@ class Blackhole implements Blackhole_Interface
     }
 
     /* @return file
-     * This function will return the database (pit)
+     * This function will return the database
      */
-    public function ipTrap()
+    public function data()
     {
-        $ipTrap = file($this->settings['blacklistfile']);
-        sort($ipTrap);
-        reset($ipTrap);
+        $dataset = file($this->settings['blacklistfile']);
+        sort($dataset);
+        reset($dataset);
 
-        return $ipTrap;
+        return $dataset;
     }
 
  /* @return string
-     * This function will return the view
+     * This function will inject the poison into the view and return the view
      */
-    public function view($file,$poison_type)
+    public function exploit($file, $poison_type)
     {
-    $file_data = file_get_contents($file);
+    $subject = file_get_contents($file);
     $poison = new $poison_type();
     $effect = new Poison();
-    $result = $effect->inject($file_data,$poison);
+    $result = $effect->inject($subject,$poison);
     return $result;
     }
 
