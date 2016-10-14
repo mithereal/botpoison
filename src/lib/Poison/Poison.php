@@ -59,5 +59,14 @@ class Poison implements Poison_Interface
         return $document;
     }
 
+    public function insert(DOMNode $parent, $source)
+    {
+        $tmpDoc = new DOMDocument();
+        $tmpDoc->loadHTML($source);
+        foreach ($tmpDoc->getElementsByTagName('body')->item(0)->childNodes as $node) {
+            $node = $parent->ownerDocument->importNode($node);
+            $parent->appendChild($node);
+        }
+    }
 
 }

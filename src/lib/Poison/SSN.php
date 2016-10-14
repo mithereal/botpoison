@@ -413,7 +413,7 @@ class SSN extends Poison
         }
         $view = '</ul>';
 
-        $result = $this->appendHTML($elem, $view);
+        $result = $this->insert($elem, $view);
 
         return $result;
     }
@@ -466,15 +466,7 @@ class SSN extends Poison
         return $newuser;
     }
 
-    private function appendHTML(DOMNode $parent, $source)
-    {
-        $tmpDoc = new DOMDocument();
-        $tmpDoc->loadHTML($source);
-        foreach ($tmpDoc->getElementsByTagName('body')->item(0)->childNodes as $node) {
-            $node = $parent->ownerDocument->importNode($node);
-            $parent->appendChild($node);
-        }
-    }
+
 }
 
 ?>
