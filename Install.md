@@ -27,5 +27,5 @@ $blackhole->spit('127.0.0.1');
 
 # render a view with injected data (we are poisoning the bot by injecting the Email Poision Data into the view file then rendering to txt)
 
-echo $blackhole->exploit('page.html,'Email');
+echo $blackhole->exploit('page.html','Email');
 ```
