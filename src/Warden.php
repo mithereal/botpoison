@@ -13,22 +13,40 @@ namespace Mithereal\Botpoison;
 class Warden implements Jail_Interface
 {
 
-    public $ip;
+    public $suspect;
     public $settings;
 
     /* @return false
      * Construct Function
      */
-    public function __construct($settings = null)
+    public function __construct($settings = ['suspect' => null, 'settings' => null])
     {
-    if(null === $settings){
-        require 'lib/config.php';
-    }
-        $this->settings = $settings;
-        $this->ip = $_SERVER['REMOTE_ADDR'];
+        if (null === $settings) {
+            require 'lib/config.php';
+        }
+        if (!is_empty($settings['settings'])) {
+            $this->settings = $settings['settings'];
+        }
+
+        investigate($settings['suspect']);
     }
 
+    public function investigate($suspect = null)
+    {
 
+        $this->suspect = $suspect;
+
+        if ($suspect === null) {
+            $this->suspect['ip'] = $_SERVER['REMOTE_ADDR'];
+            $this->suspect['query_string'] = $_SERVER['QUERY_STRING'];
+            $this->suspect['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
+            $this->suspect['referrer'] = $_SERVER['HTTP_REFERER'];
+            $this->suspect['protocol'] = $_SERVER['SERVER_PROTOCOL'];
+            $this->suspect['method'] = $_SERVER['REQUEST_METHOD'];
+            $this->suspect['request_uri'] = $_SERVER['REQUEST_URI'];
+            $this->suspect['timestamp'] = date('Y/m/d @ h:i:s a', current_time('timestamp'));
+        }
+    }
 
     /* @return bool
      * @param string
@@ -36,14 +54,30 @@ class Warden implements Jail_Interface
      */
     public function validate($ip = null)
     {
-        $ip = $this->ip;
-        if ((!$ip) || (!preg_match("/^[\w\d\.\-]+\.[\w\d]{1,4}$/i", $this->ip))) {
-            $message['message'] = " Error: You did not specify a valid target host or IP.";
-            $this->debug($message);
-            $valid = false;
-        } else {
-            $valid = true;
+
+        $valid = false;
+
+        switch ($ip) {
+            case !$ip:
+                #   $message['message'] = " Error: You did not specify a valid target host or IP.";
+                #   $this->debug($message);
+                $valid = false;
+                break;
+            case preg_match("/^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/", $ip):
+                #   $message['message'] = " Error: You did not specify a valid target host or IP.";
+                #   $this->debug($message);
+                $valid = true;
+                break;
+            case preg_match("/^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/", $ip):
+                #   $message['message'] = " Error: You did not specify a valid target host or IP.";
+                #   $this->debug($message);
+                $valid = true;
+                break;
+            default:
+                $valid = false;
         }
+
+
         return $valid;
     }
 
@@ -53,19 +87,19 @@ class Warden implements Jail_Interface
      */
     public function lookup($ip = null)
     {
-        $bot = null; // set default value
+        $record = null; // set default value
         $filename = $this->settings['blacklistfile']; // scan to prevent duplicates
         $fp = fopen($filename, "r") or die("\t\t\t<p>Error opening file...</p>\n\t\t</div>\n\t</body>\n</html>");
         while ($line = fgets($fp)) {
             if (!preg_match("/(googlebot|slurp|msnbot|teoma|yandex)/i", $line)) {
                 $u = explode(" ", $line);
                 if ($u[0] == $_SERVER['REMOTE_ADDR']) {
-                    $bot++;
+                    $record++;
                 }
             }
         }
         fclose($fp);
-        return $bot;
+        return $record;
     }
 
     /* @return bool
@@ -95,9 +129,10 @@ class Warden implements Jail_Interface
      */
     public function whois($ip = null, $msg = null)
     {
-        $ip = $this->ip;
+        $ip = $this->suspect;
         $server = "whois.arin.net";
-        if (!$ip = gethostbyname($this->ip)) {
+
+        if (!$ip = gethostbyname($this->suspect)) {
             $message['message'] .= " Can't IP Whois without an IP address.";
         } else {
             $sock = null;
@@ -152,9 +187,9 @@ class Warden implements Jail_Interface
     public function debug($data = [])
     {
         $timestamp = time();
-        $message = "\t\t\t" . "Timestamp: " . $timestamp .  "\n";
-        $message .= "\t\t\t" . "IP Address: " . $this->ip .  "\n";
-        $message .= "\t\t\t" . "Message: " . $data['message'] .  "\n";
+        $message = "\t\t\t" . "Timestamp: " . $timestamp . "\n";
+        $message .= "\t\t\t" . "IP Address: " . $this->suspect['ip'] . "\n";
+        $message .= "\t\t\t" . "Message: " . $data['message'] . "\n";
         return $message;
     }
 
@@ -164,9 +199,11 @@ class Warden implements Jail_Interface
      */
     public function contact($data = [])
     {
-        $tmestamp = time();
-        $datestamp = date("l, F jS Y @ H:i:s", $tmestamp);
-        $sender = $data['sender'];
+        $timestamp = time();
+        $datestamp = date("l, F jS Y @ H:i:s", $timestamp);
+        $headers  = 'X-Mailer: BotPoison'. "\n";
+    	$headers .= $data['sender']. "\n";
+	    $headers .= 'Content-Type: text/plain; charset=UTF-8' . "\n";
         $recipient = $data['recipient'];
         $subject = $data['subject'];
         $message = $datestamp . "\n\n";
@@ -177,8 +214,8 @@ class Warden implements Jail_Interface
             $message .= "Whois Lookup: " . "\n";
             $message .= "\n" . $data['whois'] . "\n";
         }
-        $success = mail($recipient, $subject, $message, "From: $sender"); // send email
-        return $success;
+        $result = mail($recipient, $subject, $message, $headers);
+        return $result;
     }
 
     /* @return bool
@@ -194,7 +231,7 @@ class Warden implements Jail_Interface
     }
 
     /* @return bool
-     * This function will wipe all ip addresses from the database (pit)
+     * This function will wipe all ip addresses from the database
      */
     public function empty()
     {
@@ -209,29 +246,53 @@ class Warden implements Jail_Interface
 
     /* @return string
      * @param string
-     * This function will return the date/time the ip address was banned
+     * This function will inspect the headers
      */
-    public function inspect($ipaddress = null)
+    public function inspect($headers = null)
     {
-        $time = null;
-        $filename = $this->settings['blacklistfile']; // scan to prevent duplicates
-        $fp = fopen($filename, "r") or die("\t\t\t<p>Error opening file...</p>\n\t\t</div>\n\t</body>\n</html>");
-        while ($line = fgets($fp)) {
-            if (!preg_match("/(googlebot|slurp|msnbot|teoma|yandex)/i", $line)) {
-                $u = explode(" ", $line);
-                if ($u[0] == $_SERVER['REMOTE_ADDR']) {
-                    $ipinfo = $line;
+        if ($headers === null) {
+            $headers = array('REMOTE_ADDR', 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'HTTP_X_REAL_IP', 'HTTP_CF_CONNECTING_IP');
+        }
+        $result = [];
+
+        foreach ($headers as $header) {
+
+            if (array_key_exists($header, $_SERVER) === true) {
+
+                foreach (explode(',', $_SERVER[$header]) as $value) {
+
+                    $trimmed = trim($value);
+
+                    $ip = $this->clean($trimmed);
+
+                    if ($this->validate($ip)) {
+                        $result[$header] = $ip;
+                    }
                 }
             }
         }
-        fclose($fp);
+        return $result;
+    }
 
-        $time = $string;
-        $filename = $this->settings['blacklistfile'];
-        $file = file($filename);
-        fclose($file);
-        return $time;
+    /* @return string
+     * @param string
+     * This function will cleanup the ip
+     */
+    private function clean($ip = null)
+    {
+        if (strpos($ip, ':') !== false && substr_count($ip, '.') == 3 && strpos($ip, '[') === false) {
 
+            $ip = explode(':', $ip);
+            $ip = $ip[0];
+
+        } else {
+
+            $ip = explode(']', $ip);
+            $ip = ltrim($ip[0], '[');
+
+        }
+
+        return $ip;
     }
 
     /* @return string
@@ -266,16 +327,16 @@ class Warden implements Jail_Interface
         return $dataset;
     }
 
- /* @return string
+    /* @return string
      * This function will inject the poison into the view and return the view
      */
     public function exploit($file, $poison_type)
     {
-    $subject = file_get_contents($file);
-    $poison = new $poison_type();
-    $effect = new Poison();
-    $result = $effect->inject($subject,$poison);
-    return $result;
+        $subject = file_get_contents($file);
+        $poison = new $poison_type();
+        $effect = new Poison();
+        $result = $effect->inject($subject, $poison);
+        return $result;
     }
 
 
