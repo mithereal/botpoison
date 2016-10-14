@@ -36,3 +36,7 @@ $blackhole->clear();
 echo $blackhole->exploit('page.html','Email');
 echo $blackhole->exploit('page.html','SSN');
 
+## exploits can be chained together ex. 
+
+$injected_email = $blackhole->exploit('page.html','Email');
+echo $blackhole->exploit($injected_email,'SSN');
