@@ -236,7 +236,7 @@ class Email extends Poison
         $tmpdom = array_rand($this->settings['tldomains'], 1);
         $newdomain .= "." . $this->settings['tldomains'][$tmpdom];
         if (rand(1, $this->settings['internat_ratio']) ==  $this->settings['internat_ratio']) {
-          $tmpdom = array_rand($this->settings['ctldomains'], 1)
+          $tmpdom = array_rand($this->settings['ctldomains'], 1);
             $newdomain .= "." . $this->settings['ctldomains'][$tmpdom];
         }
         return $newdomain;
