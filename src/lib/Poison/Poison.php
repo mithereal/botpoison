@@ -43,7 +43,7 @@ class Poison implements Poison_Interface
      * @param property string
      * inject Function to insert poison into string
      */
-    public function inject($view = null, $poison = self)
+    public function mix($view = null, $poison = self)
     {
         $dom = new DOMDocument();
         $document = null;

@@ -330,12 +330,11 @@ class Warden implements Jail_Interface
     /* @return string
      * This function will inject the poison into the view and return the view
      */
-    public function exploit($file, $poison_type)
+    public function force($recipe, $poison_type)
     {
-        $subject = file_get_contents($file);
-        $poison = new $poison_type();
-        $effect = new Poison();
-        $result = $effect->inject($subject, $poison);
+        $component = new $poison_type();
+        $poison = new Poison();
+        $result = $poison->mix($recipe, $component);
         return $result;
     }
 
