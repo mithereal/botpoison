@@ -28,7 +28,7 @@ class Warden implements Jail_Interface
             $this->settings = $settings['settings'];
         }
 
-        investigate($settings['suspect']);
+        $this->investigate($settings['suspect']);
     }
 
     public function investigate($suspect = null)
