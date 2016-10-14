@@ -1,6 +1,6 @@
 {
   "name": "mithereal/botpoison",
-  "description": "Automatically trap, block, and poison bots.",
+  "description": "Trap, Block and Poison Bots.",
   "type": "library",
   "license": "MIT",
   "keywords": [
