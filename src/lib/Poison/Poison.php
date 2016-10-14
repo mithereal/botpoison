@@ -6,7 +6,7 @@
  * Time: 7:35 PM
  */
 
-namespace Mithereal\Blackhole;
+namespace Mithereal\Botpoison;
 
 
 class Poison implements Poison_Interface

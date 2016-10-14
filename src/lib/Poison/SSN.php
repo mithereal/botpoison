@@ -1,6 +1,6 @@
 <?php
 
-namespace Mithereal\Blackhole;
+namespace Mithereal\Botpoison;
 
 class SSN extends Poison
 {

@@ -8,9 +8,9 @@ Release: 10.13.2016
 Version: 1.0
 */
 
-namespace Mithereal\Blackhole;
+namespace Mithereal\Botpoison;
 
-class Blackhole implements Blackhole_Interface
+class Warden implements Jail_Interface
 {
 
     public $ip;
@@ -51,7 +51,7 @@ class Blackhole implements Blackhole_Interface
      * @param  string
      * This function will determine weather the user is a known bot (ie already in the database)
      */
-    public function detect($ip = null)
+    public function lookup($ip = null)
     {
         $bot = null; // set default value
         $filename = $this->settings['blacklistfile']; // scan to prevent duplicates
@@ -72,7 +72,7 @@ class Blackhole implements Blackhole_Interface
      * @param  string
      * This function will add a ip address to the database
      */
-    public function swallow($ip = null)
+    public function admit($ip = null)
     {
         $success = null;
         $timestamp = time();
@@ -196,7 +196,7 @@ class Blackhole implements Blackhole_Interface
     /* @return bool
      * This function will wipe all ip addresses from the database (pit)
      */
-    public function clear()
+    public function empty()
     {
         $filename = $this->settings['blacklistfile'];
         $fp = fopen($filename, 'w+');
@@ -238,9 +238,9 @@ class Blackhole implements Blackhole_Interface
      * @param string
      * This function will remove one ip address from the database
      */
-    public function spit($ip = null)
+    public function discharge($ip = null)
     {
-        $dataset = $this->data();
+        $dataset = $this->jail();
         $fp = fopen($this->settings['blacklistfile'], 'w') or die("\t\t\t<p>Error opening file...</p>\n\t\t</div>\n\t</body>\n</html>");
         flock($fp, LOCK_EX);
         if ($fp != 0) {
@@ -257,7 +257,7 @@ class Blackhole implements Blackhole_Interface
     /* @return file
      * This function will return the database
      */
-    public function data()
+    public function jail()
     {
         $dataset = file($this->settings['blacklistfile']);
         sort($dataset);
