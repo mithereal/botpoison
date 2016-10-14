@@ -124,7 +124,7 @@ class Email extends Poison
         } else {
             $spammers = $this->generate($this->settings['count']);
         }
-        return $this->generate_view($spammers);
+        return $this->generate_view($spammers,$words);
 
     }
 
@@ -263,14 +263,14 @@ class Email extends Poison
      * @param string
      * Create a view snippet.
      */
-    public function generate_view($spammers)
+    public function generate_view($spammers,$wordlist)
     {
         $dom = new DOMDocument();
         $elem = $dom->createElement('div');
 
         $view = '<ul>';
         foreach ($spammers as $s) {
-            $view .= '<li>' . $s . '</li>';
+            $view .= '<li>' . $this->build_username($wordlist) . ' - ' .$s . '</li>';
         }
         $view = '</ul>';
 
