@@ -26,6 +26,10 @@ echo $blackhole->detect('127.0.0.1');
 
 $blackhole->spit('127.0.0.1');
 
+# clear all ips
+
+$blackhole->clear();
+
 # render a view with injected data (we are poisoning the bot by injecting the Email or SSN Poison 
 # module Data (/lib/Poison/?.php)into the view file then rendering to txt)
 

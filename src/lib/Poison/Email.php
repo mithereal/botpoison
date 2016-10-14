@@ -28,9 +28,9 @@ class Email extends Poison
     ];
 
 
-    public $common_symbols = array(".", ".", ".", ".", ",", ",", ",", ",", ",", ",", ",", ";", ";", ";", "?", "!");
-    public $end_symbols = array(".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "?", "!");
-    public $tldomains = array("com", "com", "com", "com", "com", "com", "com", "com", "com", "com", "com",
+    private $common_symbols = array(".", ".", ".", ".", ",", ",", ",", ",", ",", ",", ",", ";", ";", ";", "?", "!");
+    private $end_symbols = array(".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", ".", "?", "!");
+    private $tldomains = array("com", "com", "com", "com", "com", "com", "com", "com", "com", "com", "com",
         "com", "com", "com", "com", "com", "com", "com", "com", "com", "com", "com",
         "com", "com", "com", "com", "com", "com", "com", "com", "com", "com", "com",
         "com", "com", "com", "com", "com", "com", "com", "com", "com", "com", "com",
@@ -38,7 +38,7 @@ class Email extends Poison
         "net", "net", "net", "net", "net", "net", "net", "net",
         "org", "org", "org", "org",
         "biz", "biz", "info", "info", "edu", "gov");
-    public $ctldomains = array("de", "de", "de", "de", "de", "de", "de", "de", "de", "de",
+    private $ctldomains = array("de", "de", "de", "de", "de", "de", "de", "de", "de", "de",
         "de", "de", "de", "de", "de", "de", "de", "de", "de", "de",
         "uk", "uk", "uk", "uk", "uk", "uk", "uk", "uk", "uk", "uk",
         "uk", "uk", "uk", "uk", "uk", "uk", "uk", "uk", "uk", "uk",
@@ -75,7 +75,7 @@ class Email extends Poison
      * @param string
      *  Function
      */
-    public function linecount($file)
+    private function linecount($file)
     {
         $linecount = 0;
         $handle = fopen($file, "r");
@@ -133,7 +133,7 @@ class Email extends Poison
      * @param property value
      * Load the words from the cache file to memory.
      */
-    public function fill_word_cache($sourcefilename, $targetfilename, $totalsourcewords, $totaltargetwords, $minword_len, $maxword_len, $ttl)
+    private function fill_word_cache($sourcefilename, $targetfilename, $totalsourcewords, $totaltargetwords, $minword_len, $maxword_len, $ttl)
     {
         $this->settings['count'] = $totalsourcewords;
         $sourcefile = null;
@@ -176,7 +176,7 @@ class Email extends Poison
      * @param property value
      * Load the words from the cache file to memory.
      */
-    public function load_words($sourcefilename, $insertrate)
+    private function load_words($sourcefilename, $insertrate)
     {
         $wordlist = [];
         if (file_exists($sourcefilename) && is_readable($sourcefilename)) {
@@ -198,7 +198,7 @@ class Email extends Poison
      * @param property value
      * Add a short random string to the beginning or end of a given string.
      */
-    public function add_salt($textstr, $presalt, $postsalt)
+    private function add_salt($textstr, $presalt, $postsalt)
     {
 
         $presaltstr = "";
@@ -230,7 +230,7 @@ class Email extends Poison
      * @param property array
      * Create a Domain.
      */
-    public function build_domain($wordlist)
+    private function build_domain($wordlist)
     {
         $newdomain = $wordlist[array_rand($wordlist, 1)];
         $tmpdom = array_rand($this->settings['tldomains'], 1);
@@ -246,7 +246,7 @@ class Email extends Poison
      * @param array
      * Create a username.
      */
-    public function build_username($wordlist)
+    private function build_username($wordlist)
     {
         return $wordlist[array_rand($wordlist, 1)];
     }
@@ -255,7 +255,7 @@ class Email extends Poison
      * @param string
      * Extract domain name from email address.
      */
-    public function extract_domain($email)
+    private function extract_domain($email)
     {
         return strstr($email, "@");
     }
@@ -264,7 +264,7 @@ class Email extends Poison
      * @param string
      * Create a view snippet.
      */
-    public function generate_view($spammers,$wordlist)
+    private function generate_view($spammers,$wordlist)
     {
         $dom = new DOMDocument();
         $elem = $dom->createElement('div');
@@ -308,7 +308,7 @@ class Email extends Poison
         return $newemail;
     }
 
-    public function appendHTML(DOMNode $parent, $source)
+    private function appendHTML(DOMNode $parent, $source)
     {
         $tmpDoc = new DOMDocument();
         $tmpDoc->loadHTML($source);

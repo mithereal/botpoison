@@ -241,7 +241,7 @@ class SSN extends Poison
      * @param string
      *  Function
      */
-    public function linecount($file)
+    private function linecount($file)
     {
         $linecount = 0;
         $handle = fopen($file, "r");
@@ -297,7 +297,7 @@ class SSN extends Poison
      * @param property value
      * Load the words from the cache file to memory.
      */
-    public function fill_word_cache($sourcefilename, $targetfilename, $totalsourcewords, $totaltargetwords, $minword_len, $maxword_len, $ttl)
+    private function fill_word_cache($sourcefilename, $targetfilename, $totalsourcewords, $totaltargetwords, $minword_len, $maxword_len, $ttl)
     {
         $this->settings['count'] = $totalsourcewords;
         $sourcefile = null;
@@ -340,7 +340,7 @@ class SSN extends Poison
      * @param property value
      * Load the words from the cache file to memory.
      */
-    public function load_words($sourcefilename, $insertrate)
+    private function load_words($sourcefilename, $insertrate)
     {
         $wordlist = [];
         if (file_exists($sourcefilename) && is_readable($sourcefilename)) {
@@ -362,7 +362,7 @@ class SSN extends Poison
      * @param property value
      * Add a short random string to the beginning or end of a given string.
      */
-    public function add_salt($textstr, $presalt, $postsalt)
+    private function add_salt($textstr, $presalt, $postsalt)
     {
 
         $presaltstr = "";
@@ -393,7 +393,7 @@ class SSN extends Poison
      * @param array
      * Create a username.
      */
-    public function build_username($wordlist)
+    private function build_username($wordlist)
     {
         return $wordlist[array_rand($wordlist, 1)];
     }
@@ -402,7 +402,7 @@ class SSN extends Poison
      * @param string
      * Create a view snippet.
      */
-    public function generate_view($data)
+    private function generate_view($data)
     {
         $dom = new DOMDocument();
         $elem = $dom->createElement('div');
@@ -423,7 +423,7 @@ class SSN extends Poison
      * @param array
      * Create a username.
      */
-    function generateSSN($state = false, $separator = '-'){
+    private function generateSSN($state = false, $separator = '-'){
         $states = $this->states;
         $statePrefixes = $this->statePrefixes;
         $highgroup = $this->highgroup;
@@ -466,7 +466,7 @@ class SSN extends Poison
         return $newuser;
     }
 
-    public function appendHTML(DOMNode $parent, $source)
+    private function appendHTML(DOMNode $parent, $source)
     {
         $tmpDoc = new DOMDocument();
         $tmpDoc->loadHTML($source);

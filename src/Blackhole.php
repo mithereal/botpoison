@@ -93,7 +93,7 @@ class Blackhole implements Blackhole_Interface
      * @param string
      * This function grabs whois query data
      */
-    private function whois($ip = null, $msg = null)
+    public function whois($ip = null, $msg = null)
     {
         $ip = $this->ip;
         $server = "whois.arin.net";
