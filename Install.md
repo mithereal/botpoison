@@ -36,11 +36,11 @@ $warden->jail();
 # render a view with injected data (we are poisoning the bot by injecting the Email or SSN Poison 
 # module Data (/lib/Poison/?.php)into the view file then rendering to txt)
 
-echo $warden->exploit('page.html','Email');
-echo $warden->exploit('page.html','SSN');
+echo $warden->force('page.html','Email');
+echo $warden->force('page.html','SSN');
 
 ## exploits can be chained together ex. 
 
-$injected_email = $warden->exploit('page.html','Email');
-echo $warden->exploit($injected_email,'SSN');
+$injected_email = $warden->force('page.html','Email');
+echo $warden->force($injected_email,'SSN');
 ```
