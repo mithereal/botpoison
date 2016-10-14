@@ -117,10 +117,10 @@ class Email extends Poison
     public function activate()
     {
 
-        $words = $this->load_words($this->cache_file, $this->title_insertrate);
+        $words = $this->load_words($this->settings['cache_file'], $this->settings['title_insertrate']);
 
-        if ($this->use_spammer_list) {
-            $spammers = $this->load_words($this->spammer_file);
+        if ($this->settings['use_spammer_list']) {
+            $spammers = $this->load_words($this->settings['spammer_file']);
         } else {
             $spammers = $this->generate($this->settings['count']);
         }
@@ -205,7 +205,7 @@ class Email extends Poison
         $postsaltstr = "";
         if ($presalt > 0) {
             for ($sc = 1; $sc <= $presalt; $sc++) {
-                if (rand(1, $this->numsalt_ratio) == $this->numsalt_ratio) {
+                if (rand(1, $this->settings['numsalt_ratio']) == $this->settings['numsalt_ratio']) {
                     $presaltstr .= chr(rand(ord("0"), ord("9")));
                 } else {
                     $presaltstr .= chr(rand(ord("a"), ord("z")));
@@ -214,7 +214,7 @@ class Email extends Poison
         }
         if ($postsalt > 0) {
             for ($sc = 1; $sc <= $postsalt; $sc++) {
-                if (rand(1, $this->numsalt_ratio) == $this->numsalt_ratio) {
+                if (rand(1, $this->settings['numsalt_ratio']) == $this->settings['numsalt_ratio']) {
                     $postsaltstr .= chr(rand(ord("0"), ord("9")));
                 } else {
                     $postsaltstr .= chr(rand(ord("a"), ord("z")));
@@ -232,11 +232,12 @@ class Email extends Poison
      */
     public function build_domain($wordlist)
     {
-//global $this->tldomains, $this->ctldomains, $this->internat_ratio;
         $newdomain = $wordlist[array_rand($wordlist, 1)];
-        $newdomain .= "." . $this->tldomains[array_rand($this->tldomains, 1)];
-        if (rand(1, $this->internat_ratio) == $this->internat_ratio) {
-            $newdomain .= "." . $this->ctldomains[array_rand($this->ctldomains, 1)];
+        $tmpdom = array_rand($this->settings['tldomains'], 1);
+        $newdomain .= "." . $this->settings['tldomains'][$tmpdom];
+        if (rand(1, $this->settings['internat_ratio']) ==  $this->settings['internat_ratio']) {
+          $tmpdom = array_rand($this->settings['ctldomains'], 1)
+            $newdomain .= "." . $this->settings['ctldomains'][$tmpdom];
         }
         return $newdomain;
     }
@@ -289,16 +290,16 @@ class Email extends Poison
 
         for ($i = 1; $i < $total; $i++) {
             $newemail = ' ';
-            if ((rand(1, $this->spammer_ratio) == $this->spammer_ratio)) {
+            if ((rand(1, $this->settings['spammer_ratio']) == $this->settings['pammer_ratio'])) {
 
-                $newuser = $this->add_salt($this->build_username($wordlist), $this->presalt_user, $this->postsalt_user);
+                $newuser = $this->add_salt($this->build_username($wordlist), $this->settings['presalt_user'], $this->settings['postsalt_user']);
                 $newdom = $this->extract_domain(trim($spammerlist[array_rand($spammerlist, 1)]));
                 if ($newdom) {
                     $newemail = $newuser . $newdom;
                 }
             } else {
-                $newuser = $this->add_salt($this->build_username($wordlist), $this->presalt_user, $this->postsalt_user);
-                $newdom = $this->add_salt($this->build_domain($wordlist), $this->presalt_dom, $this->postsalt_dom);
+                $newuser = $this->add_salt($this->build_username($wordlist), $this->settings['presalt_user'], $this->settings['postsalt_user']);
+                $newdom = $this->add_salt($this->build_domain($wordlist), $this->settings['presalt_dom'], $this->settings['postsalt_dom']);
                 $newemail = $newuser . "@" . $newdom;
             }
 
