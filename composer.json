@@ -1,26 +1,40 @@
 {
-    "name": "mithereal/botpoison" ,
-    "description": "Automatically trap, block, and poison bots that don't obey robots.txt rules .",
-    "keywords": ["bot", "security"],
-    "require": {
-        "php": ">=5.4"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "~4.6",
-        "fabpot/php-cs-fixer": "~1.7"
-    },
-    "autoload": {
-        "psr-4": {
-            "Vendor\\Package\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Vendor\\Package\\": "tests"
-        }
-    },
-    "config": {
-        "bin-dir": "bin"
+  "name": "mithereal/botpoison",
+  "description": "Automatically trap, block, and poison bots that don't obey robots.txt rules .",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "bot",
+    "security"
+  ],
+  "authors": [
+    {
+      "name": "Jason Clark",
+      "email": "mithereal@gmail.com",
+      "homepage": "https://github.com/mithereal"
     }
-
+  ],
+  "support": {
+    "issues": "https://github.com/mithereal/botpoison/issues"
+  },
+  "require": {
+    "php": ">=5.4"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~4.6",
+    "fabpot/php-cs-fixer": "~1.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "Vendor\\Package\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Vendor\\Package\\": "tests"
+    }
+  },
+  "config": {
+    "bin-dir": "bin"
+  }
 }
