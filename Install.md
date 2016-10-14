@@ -21,11 +21,11 @@ $blackhole->swallow('127.0.0.1');
 
 echo $blackhole->detect('127.0.0.1');
   
-# ban an ip
+# unban an ip
 
 $blackhole->spit('127.0.0.1');
 
-# render a view with injected data (we are poisoning the bot by injecting the Email or SSN Poision Data into the view file then rendering to txt)
+# render a view with injected data (we are poisoning the bot by injecting the Email or SSN Poison Data into the view file then rendering to txt)
 
 echo $blackhole->exploit('page.html','Email');
 echo $blackhole->exploit('page.html','SSN');
