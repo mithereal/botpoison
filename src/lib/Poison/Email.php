@@ -9,7 +9,6 @@ class Email extends Poison
         'word_file' => 200,
         'total_words' => 0,
         'word_cache_file' => "cache/word_cache.txt",
-        'email_cache_file' => "cache/email_cache.txt",
         'cached_words' => 1000,
         'minword_len' => 4,
         'maxword_len' => 10,
@@ -62,8 +61,12 @@ class Email extends Poison
         "cz", "sg", "ar", "my", "il", "ir", "nz", "tw", "pt", "za",
         "bg", "id", "ro", "mc", "ua", "ve");
 
-    public function __construct()
+    public function __construct($settings = null)
     {
+
+        if (null !== $settings) {
+            $this->settings = array_merge($this->settings, $settings);
+        }
         $total_words = $this->linecount($file);
         $this->fill_word_cache($this->settings['word_file'], $this->settings['word_cache_file'], $total_words, $this->settings['cached_words'], $this->settings['cache_ttl']);
     }
@@ -94,7 +97,7 @@ class Email extends Poison
      */
     public function get($var)
     {
-    return $this->settings[$var];
+        return $this->settings[$var];
     }
 
     /* @return bool
@@ -104,8 +107,8 @@ class Email extends Poison
      */
     public function set($var, $value)
     {
-      $this->settings[$var] = $value;
-      return true;
+        $this->settings[$var] = $value;
+        return true;
     }
 
     /* @return property
@@ -121,7 +124,7 @@ class Email extends Poison
         } else {
             $spammers = $this->generate($this->settings['count']);
         }
-      return  $this->generate_view($spammers);
+        return $this->generate_view($spammers);
 
     }
 
@@ -130,7 +133,7 @@ class Email extends Poison
      * @param property value
      * Load the words from the cache file to memory.
      */
-    public function fill_word_cache($sourcefilename, $targetfilename, $totalsourcewords, $totaltargetwords,$minword_len, $maxword_len, $ttl)
+    public function fill_word_cache($sourcefilename, $targetfilename, $totalsourcewords, $totaltargetwords, $minword_len, $maxword_len, $ttl)
     {
         $this->settings['count'] = $totalsourcewords;
         $sourcefile = null;
@@ -186,7 +189,7 @@ class Email extends Poison
                 }
             }
         }
-         return $wordlist;
+        return $wordlist;
     }
 
 
@@ -262,21 +265,21 @@ class Email extends Poison
      */
     public function generate_view($spammers)
     {
-    $dom = new DOMDocument();
-    $elem = $dom->createElement('div');
+        $dom = new DOMDocument();
+        $elem = $dom->createElement('div');
 
-    $view ='<ul>';
-    foreach($spammers as $s){
-    $view .='<li>' . $s . '</li>';
+        $view = '<ul>';
+        foreach ($spammers as $s) {
+            $view .= '<li>' . $s . '</li>';
+        }
+        $view = '</ul>';
+
+        $result = $this->appendHTML($elem, $view);
+
+        return $result;
     }
-    $view ='</ul>';
 
-   $result = $this->appendHTML($elem, $view);
-
-    return $result;
-    }
-
-     /* @return string
+    /* @return string
      * @param string
      * @param array
      * Create a username.
@@ -304,14 +307,15 @@ class Email extends Poison
         return $newemail;
     }
 
-public function appendHTML(DOMNode $parent, $source) {
-    $tmpDoc = new DOMDocument();
-    $tmpDoc->loadHTML($source);
-    foreach ($tmpDoc->getElementsByTagName('body')->item(0)->childNodes as $node) {
-        $node = $parent->ownerDocument->importNode($node);
-        $parent->appendChild($node);
+    public function appendHTML(DOMNode $parent, $source)
+    {
+        $tmpDoc = new DOMDocument();
+        $tmpDoc->loadHTML($source);
+        foreach ($tmpDoc->getElementsByTagName('body')->item(0)->childNodes as $node) {
+            $node = $parent->ownerDocument->importNode($node);
+            $parent->appendChild($node);
+        }
     }
-}
 }
 
 ?>

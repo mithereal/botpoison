@@ -13,7 +13,7 @@ namespace Mithereal\Blackhole;
 class Blackhole implements Blackhole_Interface
 {
 
-    public $target;
+    public $ip;
     public $settings;
 
     /* @return false
@@ -25,41 +25,26 @@ class Blackhole implements Blackhole_Interface
         require 'lib/config.php';
     }
         $this->settings = $settings;
-        $this->target = $_SERVER['REMOTE_ADDR'];
+        $this->ip = $_SERVER['REMOTE_ADDR'];
     }
 
-    /* @return property
-     * @param string
-     * Getter Function
-     */
-    public function get($var)
-    {
-    }
 
-    /* @return property
-     * @param property name
-     * @param property value
-     * Setter Function
-     */
-    public function set($var, $value)
-    {
-    }
 
     /* @return bool
      * @param string
      * This function will determine weather the ip is valid
      */
-    public function targetValid($target = null)
+    public function validate($ip = null)
     {
-        $target = $this->target;
-        if ((!$target) || (!preg_match("/^[\w\d\.\-]+\.[\w\d]{1,4}$/i", $this->target))) {
+        $ip = $this->ip;
+        if ((!$ip) || (!preg_match("/^[\w\d\.\-]+\.[\w\d]{1,4}$/i", $this->ip))) {
             $message['message'] = " Error: You did not specify a valid target host or IP.";
             $this->debug($message);
-            $isvalid = false;
+            $valid = false;
         } else {
-            $isvalid = true;
+            $valid = true;
         }
-        return $isvalid;
+        return $valid;
     }
 
     /* @return bool
@@ -68,19 +53,19 @@ class Blackhole implements Blackhole_Interface
      */
     public function detect($ip = null)
     {
-        $badbot = null; // set default value
+        $bot = null; // set default value
         $filename = $this->settings['blacklistfile']; // scan to prevent duplicates
         $fp = fopen($filename, "r") or die("\t\t\t<p>Error opening file...</p>\n\t\t</div>\n\t</body>\n</html>");
         while ($line = fgets($fp)) {
             if (!preg_match("/(googlebot|slurp|msnbot|teoma|yandex)/i", $line)) {
                 $u = explode(" ", $line);
                 if ($u[0] == $_SERVER['REMOTE_ADDR']) {
-                    $badbot++;
+                    $bot++;
                 }
             }
         }
         fclose($fp);
-        return $badbot;
+        return $bot;
     }
 
     /* @return bool
@@ -90,8 +75,8 @@ class Blackhole implements Blackhole_Interface
     public function swallow($ip = null)
     {
         $success = null;
-        $tmestamp = time();
-        $datestamp = date("l, F jS Y @ H:i:s", $tmestamp);
+        $timestamp = time();
+        $datestamp = date("l, F jS Y @ H:i:s", $timestamp);
         $filename = $this->settings['blacklistfile'];
         $fp = fopen($filename, 'a+'); // append to blacklistfile
         flock($fp, LOCK_EX);
@@ -108,11 +93,11 @@ class Blackhole implements Blackhole_Interface
      * @param string
      * This function grabs whois query data
      */
-    private function whois($target = null, $msg = null)
+    private function whois($ip = null, $msg = null)
     {
-        $target = $this->target;
+        $ip = $this->ip;
         $server = "whois.arin.net";
-        if (!$target = gethostbyname($this->target)) {
+        if (!$ip = gethostbyname($this->ip)) {
             $message['message'] .= " Can't IP Whois without an IP address.";
         } else {
             $sock = null;
@@ -123,7 +108,7 @@ class Blackhole implements Blackhole_Interface
                 unset($sock);
                 $message['message'] .= " Timed-out connecting to $server (port 43).";
             } else {
-                fputs($sock, "$target\n");
+                fputs($sock, "$ip\n");
                 while (!feof($sock))
                     $buffer .= fgets($sock, 10240);
                 fclose($sock);
@@ -148,7 +133,7 @@ class Blackhole implements Blackhole_Interface
                     unset($sock);
                     $msg .= " Timed-out connecting to $nextServer (port 43)";
                 } else {
-                    fputs($sock, "$target$extra\n");
+                    fputs($sock, "$ip$extra\n");
                     while (!feof($sock))
                         $buffer .= fgets($sock, 10240);
                     fclose($sock);
@@ -168,7 +153,7 @@ class Blackhole implements Blackhole_Interface
     {
         $timestamp = time();
         $message = "\t\t\t" . "Timestamp: " . $timestamp .  "\n";
-        $message .= "\t\t\t" . "IP Address: " . $this->target .  "\n";
+        $message .= "\t\t\t" . "IP Address: " . $this->ip .  "\n";
         $message .= "\t\t\t" . "Message: " . $data['message'] .  "\n";
         return $message;
     }
@@ -202,8 +187,6 @@ class Blackhole implements Blackhole_Interface
      */
     public function touch($filename = null)
     {
-        $cleared = null;
-        $filename = $filename;
         $fp = fopen($filename, 'w+');
         fwrite($fp, "\n");
         fclose($fp);
@@ -215,7 +198,6 @@ class Blackhole implements Blackhole_Interface
      */
     public function clear()
     {
-        $wiped = null;
         $filename = $this->settings['blacklistfile'];
         $fp = fopen($filename, 'w+');
         flock($fp, LOCK_EX);
