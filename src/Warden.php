@@ -121,6 +121,23 @@ class Warden implements Jail_Interface
         return $success;
     }
 
+    /* @return bool
+     * @param  string
+     * This function is an alias of admit
+     */
+    public function ban($ip = null)
+    {
+        return $this->admit($ip);
+    }
+
+    /* @return bool
+     * @param  string
+     * This function is an alias of discharge
+     */
+    public function free($ip = null)
+    {
+        return $this->discharge($ip);
+    }
 
     /* @return string
      * @param string
@@ -201,9 +218,9 @@ class Warden implements Jail_Interface
     {
         $timestamp = time();
         $datestamp = date("l, F jS Y @ H:i:s", $timestamp);
-        $headers  = 'X-Mailer: BotPoison'. "\n";
-    	$headers .= $data['sender']. "\n";
-	    $headers .= 'Content-Type: text/plain; charset=UTF-8' . "\n";
+        $headers = 'X-Mailer: BotPoison' . "\n";
+        $headers .= $data['sender'] . "\n";
+        $headers .= 'Content-Type: text/plain; charset=UTF-8' . "\n";
         $recipient = $data['recipient'];
         $subject = $data['subject'];
         $message = $datestamp . "\n\n";
