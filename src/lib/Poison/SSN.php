@@ -287,13 +287,15 @@ class SSN extends Poison
     /* @return property
      * Main Function
      */
-    public function activate()
+    public function activate():string
     {
 
         $words = $this->load_words($this->settings['cache_file'], $this->settings['title_insertrate']);
 
 
         $names = $this->generate($this->settings['count']);
+
+        $view = $this->generate($this->settings['count']);
 
         return $this->generate_view($names);
 
