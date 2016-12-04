@@ -1,7 +1,7 @@
 <?php
 $settings=array(
-'blacklistfile'=>'includes/blackhole.db',
+'blacklistfile'=>'includes/jail.db',
 'htaccesspath'=>'/',
-'version'=>'BotPoison V1.0',
+'version'=>'BotPoison V2.0',
 );
 ?>

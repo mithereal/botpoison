@@ -16,15 +16,14 @@ $warden = new Warden();
   
 # ban an ip
 
-$warden->admit('127.0.0.1');
-  
+$warden->admit('127.0.0.1'); or $warden->ban('127.0.0.1');
 # check if ip has been banned
 
 echo $warden->lookup('127.0.0.1');
   
 # unban an ip
 
-$warden->discharge('127.0.0.1');
+$warden->discharge('127.0.0.1'); or $warden->free('127.0.0.1');
 
 # clear all ips
 
